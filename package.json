@@ -1,0 +1,19 @@
+{
+  "name": "bimp-test-task",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "fastify": "^5.3.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

@@ -1,0 +1,1 @@
+# Test task for [Bimp](https://bimpsoft.com/)
