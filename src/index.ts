@@ -1,15 +1,15 @@
-import Fastify from 'fastify'
+import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
-const fastify = Fastify({
+const fastify: FastifyInstance = Fastify({
   logger: false
 })
 
-fastify.get('/', function (request, reply) {
+fastify.get('/', function (request: FastifyRequest, reply: FastifyReply) {
   reply.status(200)
 })
 
 
-const PORT = process.env.PORT || 3000
+const PORT = Number(process.env.PORT) || 3000
 
 const start = async () => {
   try {
