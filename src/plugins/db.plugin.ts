@@ -18,7 +18,7 @@ export async function registerPlugins(app: FastifyInstance) {
 
   try {
     await dataSource.initialize();
-    app.decorate('db', { dataSource });
+    app.decorate('db', dataSource);
     app.log.info('Database connection established');
   } catch (error) {
     app.log.error('Database connection failed', error);
