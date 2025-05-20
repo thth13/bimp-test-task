@@ -1,8 +1,9 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { registerPlugins } from './plugins/db.plugin';
+import { registerDB } from './plugins/db.plugin';
 import { registerBasicAuth } from './plugins/basic-auth.plugin';
 import { authRoutes } from './routes/auth';
 import { messageRoutes } from './routes/messages';
+import { registerMultipart } from './plugins/multipart.plugin';
 
 const fastify: FastifyInstance = Fastify({
   logger: true,
@@ -16,8 +17,9 @@ const PORT = Number(process.env.PORT) || 3000;
 
 const start = async () => {
   try {
-    await registerPlugins(fastify);
+    await registerDB(fastify);
     await registerBasicAuth(fastify);
+    await registerMultipart(fastify);
     await fastify.register(authRoutes);
     await fastify.register(messageRoutes);
 

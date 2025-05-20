@@ -2,9 +2,9 @@ import { FastifyInstance } from 'fastify';
 import { User } from '../models/user.model';
 import { DataSource } from 'typeorm';
 import { Message } from '../models/message.model';
-import { File } from '../models/file.model';
+import { FileEntity } from '../models/file.model';
 
-export async function registerPlugins(app: FastifyInstance) {
+export async function registerDB(fastify: FastifyInstance) {
   const dataSource = new DataSource({
     type: 'postgres',
     host: process.env.POSTGRES_HOST || 'localhost',
@@ -12,16 +12,16 @@ export async function registerPlugins(app: FastifyInstance) {
     username: process.env.POSTGRES_USER || 'postgres',
     password: process.env.POSTGRES_PASSWORD || '1234567',
     database: process.env.POSTGRES_DB || 'chat-db',
-    entities: [User, Message, File],
+    entities: [User, Message, FileEntity],
     synchronize: true,
   });
 
   try {
     await dataSource.initialize();
-    app.decorate('db', dataSource);
-    app.log.info('Database connection established');
+    fastify.decorate('db', dataSource);
+    fastify.log.info('Database connection established');
   } catch (error) {
-    app.log.error('Database connection failed', error);
+    fastify.log.error('Database connection failed', error);
     throw error;
   }
 }

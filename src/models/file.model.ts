@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { User } from './user.model';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class File {
+export class FileEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,7 +19,4 @@ export class File {
 
   @Column()
   createdAt: Date;
-
-  @ManyToOne(() => User, (user) => user.files)
-  user: User;
 }

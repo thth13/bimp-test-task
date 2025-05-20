@@ -1,12 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.model';
+import { FileEntity } from './file.model';
 
 @Entity()
 export class Message {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   content: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -14,4 +15,8 @@ export class Message {
 
   @ManyToOne(() => User, (user) => user.messages)
   user: User;
+
+  @OneToOne(() => FileEntity, { nullable: true })
+  @JoinColumn()
+  file: FileEntity | null;
 }

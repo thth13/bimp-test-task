@@ -11,6 +11,12 @@ interface RegisterBody {
 export async function authRoutes(fastify: FastifyInstance) {
   const userRepo: Repository<User> = fastify.db.getRepository(User);
 
+  /**
+   * @route   POST /register
+   * @desc    Register a new user
+   * @access  Public
+   * @body    { username: string, password: string }
+   */
   fastify.post(
     '/register',
     async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {

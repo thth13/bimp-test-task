@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Message } from './message.model';
-import { File } from './file.model';
 
 @Entity()
 export class User {
@@ -15,7 +14,4 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
-
-  @OneToMany(() => File, (file) => file.user)
-  files: File[];
 }
