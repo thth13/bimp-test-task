@@ -1,15 +1,18 @@
 import { FastifyInstance } from 'fastify';
+import { User } from '../models/user.model';
 import { DataSource } from 'typeorm';
+import { Message } from '../models/message.model';
+import { File } from '../models/file.model';
 
 export async function registerPlugins(app: FastifyInstance) {
   const dataSource = new DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_NAME || 'chat_db',
-    entities: [],
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    username: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || '1234567',
+    database: process.env.POSTGRES_DB || 'chat-db',
+    entities: [User, Message, File],
     synchronize: true,
   });
 
