@@ -2,6 +2,7 @@ import Fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { registerPlugins } from './plugins/db.plugin';
 import { registerBasicAuth } from './plugins/basic-auth.plugin';
 import { authRoutes } from './routes/auth';
+import { messageRoutes } from './routes/messages';
 
 const fastify: FastifyInstance = Fastify({
   logger: true,
@@ -18,6 +19,7 @@ const start = async () => {
     await registerPlugins(fastify);
     await registerBasicAuth(fastify);
     await fastify.register(authRoutes);
+    await fastify.register(messageRoutes);
 
     await fastify.listen({ port: PORT });
     console.log(`Server listening on ${PORT}`);

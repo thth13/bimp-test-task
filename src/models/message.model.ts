@@ -9,7 +9,7 @@ export class Message {
   @Column()
   content: string;
 
-  @Column()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @ManyToOne(() => User, (user) => user.messages)
