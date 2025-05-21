@@ -1,13 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Repository } from 'typeorm';
 import { FileEntity } from '../models/file.model';
-import fs from 'fs/promises';
-import fsSync from 'fs';
-import path from 'path';
 import { Message } from '../models/message.model';
 import { User } from '../models/user.model';
-import { getUserFromAuthHeader } from '../utils/getUserFromAuth';
-import { pipeline } from 'stream/promises';
+import { getUserFromAuthHeader, handleFileUpload, sendMessageContent } from '../utils';
 
 interface CreateMessageBody {
   text: string;
@@ -97,6 +93,7 @@ export async function messageRoutes(fastify: FastifyInstance) {
     '/message/content',
     async (request: FastifyRequest<{ Querystring: { id: string } }>, reply: FastifyReply) => {
       const id = Number(request.query.id);
+
       if (!id) {
         return reply.code(400).send({ error: 'Message id is required' });
       }
@@ -110,29 +107,7 @@ export async function messageRoutes(fastify: FastifyInstance) {
         return reply.code(404).send({ error: 'Message not found' });
       }
 
-      if (message.content) {
-        reply.header('Content-Type', 'text/plain');
-        return reply.send(message.content);
-      }
-
-      if (message.file) {
-        const filePath = message.file.path;
-        const fileExists = await fs
-          .access(filePath)
-          .then(() => true)
-          .catch(() => false);
-
-        if (!fileExists) {
-          return reply.code(404).send({ error: 'File not found' });
-        }
-
-        reply.header('Content-Type', message.file.mimetype);
-        reply.header('Content-Disposition', `inline; filename="${message.file.filename}"`);
-        const fileStream = fsSync.createReadStream(filePath);
-        return reply.send(fileStream);
-      }
-
-      return reply.code(404).send({ error: 'No content found in message' });
+      return sendMessageContent(reply, message);
     },
   );
 
@@ -152,23 +127,17 @@ export async function messageRoutes(fastify: FastifyInstance) {
         return reply.code(400).send({ error: 'No file provided' });
       }
 
-      const { filename, mimetype, file } = data;
-      const uploadDir = path.join(__dirname, '..', '..', 'uploads');
-      if (!fsSync.existsSync(uploadDir)) {
-        fsSync.mkdirSync(uploadDir, { recursive: true });
-      }
-      const filepath = path.join(uploadDir, `${Date.now()}-${filename}`);
-
-      await pipeline(file, fsSync.createWriteStream(filepath));
-
-      const { size } = await fs.stat(filepath);
+      const { filename, mimetype } = data;
+      const { filepath, size } = await handleFileUpload(data);
 
       const userRepo = fastify.db.getRepository(User);
       const messageRepo = fastify.db.getRepository(Message);
       const fileRepo = fastify.db.getRepository(FileEntity);
 
       const user = await getUserFromAuthHeader(request, userRepo);
-      if (!user) return reply.code(401).send({ error: 'Unauthorized' });
+      if (!user) {
+        return reply.code(401).send({ error: 'User not found' });
+      }
 
       const savedFile = await fileRepo.save(
         fileRepo.create({

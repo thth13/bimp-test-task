@@ -11,10 +11,12 @@ export async function registerBasicAuth(fastify: FastifyInstance) {
     reply: FastifyReply,
   ) => {
     const userRepo = fastify.db.getRepository(User);
+
     const user = await userRepo.findOne({ where: { username } });
     if (!user) {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
+
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return reply.code(401).send({ error: 'Unauthorized' });
