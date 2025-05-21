@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
 import { User } from '../models/user.model';
+import { registerUserBodySchema, registrUserResponseSchema } from '../schemas/user.schema';
 
 interface RegisterBody {
   username: string;
@@ -12,13 +13,22 @@ export async function authRoutes(fastify: FastifyInstance) {
   const userRepo: Repository<User> = fastify.db.getRepository(User);
 
   /**
-   * @route   POST /register
+   * @route   POST account/register
    * @desc    Register a new user
    * @access  Public
    * @body    { username: string, password: string }
    */
   fastify.post(
     '/register',
+    {
+      schema: {
+        summary: 'Register a new user',
+        description: 'Creates a new user account',
+        tags: ['Auth'],
+        body: registerUserBodySchema,
+        response: registrUserResponseSchema,
+      },
+    },
     async (request: FastifyRequest<{ Body: RegisterBody }>, reply: FastifyReply) => {
       const { username, password } = request.body;
 

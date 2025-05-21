@@ -4,6 +4,16 @@ import { FileEntity } from '../models/file.model';
 import { Message } from '../models/message.model';
 import { User } from '../models/user.model';
 import { getUserFromAuthHeader, handleFileUpload, sendMessageContent } from '../utils';
+import {
+  createFileMessageBodySchema,
+  createFileMessageResponseSchema,
+  createTextMessageResponseSchema,
+  createTextMessageSchema,
+  getMessageContentQuerySchema,
+  getMessageContentResponseSchema,
+  getMessageQuerySchema,
+  getMessageResposneSchema,
+} from '../schemas/message.schema';
 
 interface CreateMessageBody {
   text: string;
@@ -25,8 +35,19 @@ export async function messageRoutes(fastify: FastifyInstance) {
    * @body    { text: string }
    */
   fastify.post(
-    '/messages/text',
-    { preHandler: fastify.basicAuth },
+    '/text',
+    {
+      preHandler: fastify.basicAuth,
+      schema: {
+        summary: 'Create a text message',
+        tags: ['Messages'],
+        security: [{ basicAuth: [] }],
+        body: createTextMessageSchema,
+        response: {
+          201: createTextMessageResponseSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Body: CreateMessageBody }>, reply: FastifyReply) => {
       const { text } = request.body;
 
@@ -47,13 +68,23 @@ export async function messageRoutes(fastify: FastifyInstance) {
   );
 
   /**
-   * @route   GET /messages
+   * @route   GET /message/list
    * @desc    Get a paginated list of messages
    * @access  Public
    * @query   page, limit
    */
   fastify.get(
-    '/messages',
+    '/list',
+    {
+      schema: {
+        summary: 'Get messages',
+        tags: ['Messages'],
+        querystring: getMessageQuerySchema,
+        response: {
+          200: getMessageResposneSchema,
+        },
+      },
+    },
     async (request: FastifyRequest<{ Querystring: MessagesQuery }>, reply: FastifyReply) => {
       const page = Number(request.query.page) || 1;
       const limit = Number(request.query.limit) || 10;
@@ -70,7 +101,7 @@ export async function messageRoutes(fastify: FastifyInstance) {
         id: msg.id,
         content: msg.content,
         createdAt: msg.createdAt,
-        user: { username: msg.user.username },
+        user: msg.user.username,
         file: msg.file,
       }));
 
@@ -90,7 +121,16 @@ export async function messageRoutes(fastify: FastifyInstance) {
    * @query   id
    */
   fastify.get(
-    '/message/content',
+    '/content',
+    {
+      schema: {
+        summary: 'Get raw message content (text or file)',
+        description: 'Returns the raw content of a message (plain text or file) by message id',
+        tags: ['Messages'],
+        querystring: getMessageContentQuerySchema,
+        response: getMessageContentResponseSchema,
+      },
+    },
     async (request: FastifyRequest<{ Querystring: { id: string } }>, reply: FastifyReply) => {
       const id = Number(request.query.id);
 
@@ -118,8 +158,19 @@ export async function messageRoutes(fastify: FastifyInstance) {
    * @body    multipart/form-data (file)
    */
   fastify.post(
-    '/message/file',
-    { preHandler: fastify.basicAuth },
+    '/file',
+    {
+      preHandler: fastify.basicAuth,
+      schema: {
+        summary: 'Upload a file as a message',
+        description: 'Uploads a file and creates a message with this file.',
+        tags: ['Messages'],
+        consumes: ['multipart/form-data'],
+        security: [{ basicAuth: [] }],
+        body: createFileMessageBodySchema,
+        response: createFileMessageResponseSchema,
+      },
+    },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const data = await request.file();
 
