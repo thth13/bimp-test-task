@@ -53,7 +53,7 @@ const start = async () => {
     await fastify.register(authRoutes, { prefix: '/account' });
     await fastify.register(messageRoutes, { prefix: '/message' });
 
-    await fastify.listen({ port: PORT });
+    await fastify.listen({ port: PORT, host: '0.0.0.0' });
     console.log(`Server listening on ${PORT}`);
   } catch (err) {
     fastify.log.error(err);
